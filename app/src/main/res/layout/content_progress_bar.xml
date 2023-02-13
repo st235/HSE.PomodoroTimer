@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <st235.com.github.pomodoro.CircularProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="32dp"
+        app:cpb_progress="1.0"
+        app:cpb_progressBackgroundColor="@color/gray_300"
+        app:cpb_progressBarColor="@color/red_500"
+        app:cpb_progressBarThickness="8dp"
+        app:cpb_progressIndicatorSize="12dp" />
+
+    <TextView
+        android:id="@+id/timer_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="82sp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/red_500"
+        android:layout_gravity="center"
+        tools:text="25:00" />
+
+
+</FrameLayout>
