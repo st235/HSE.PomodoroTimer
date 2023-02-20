@@ -6,6 +6,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
+import com.github.st235.circularprogressbar.CircularProgressBar
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
