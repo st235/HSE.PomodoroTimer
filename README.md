@@ -1,4 +1,8 @@
+<img src="/images/pomodoro.jpeg" width="160" height="160">
+
 # Pomodoro timer
+
+![Min Android Sdk](https://img.shields.io/badge/minSdkVersion-21-dd4f4a.svg)
 
 [The Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique) is a time management method. 
 It uses a kitchen timer to break work into intervals, typically 25 minutes in length, 
@@ -36,3 +40,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## Misc
+
+- The timer photo is courtesy of [Marcelo Leal, Unsplash](https://unsplash.com/photos/vZawEq0Eexo)
