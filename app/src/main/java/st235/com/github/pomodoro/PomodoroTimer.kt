@@ -1,76 +1,127 @@
 package st235.com.github.pomodoro
 
-import android.os.CountDownTimer
 import java.util.concurrent.TimeUnit
 
-typealias OnTimeChangedListener = () -> Unit
-typealias OnStateChangedListener = (state: PomodoroTimer.State) -> Unit
-
 class PomodoroTimer(
-    val timeInMinutes: Long
+    activeTimeInMinutes: Long,
+    restTimeInMinutes: Long,
+    breakTimeInMinutes: Long
 ) {
 
-    private companion object {
-        const val TICK_INTERVAL = 1000L
+    private val pomodoroStateMachine = PomodoroStateMachine(
+        activeTimeInMinutes,
+        restTimeInMinutes,
+        breakTimeInMinutes
+    )
+
+    enum class PomodoroPhase {
+        ACTIVE,
+        BREAK
     }
 
-    public enum class State {
-        IDLE,
-        RUNNING,
-        STOPPED,
-        FINISHED
+    enum class State {
+        AWAITING_START,
+        RUNNING
     }
 
-    var onTimeChangedListener: OnTimeChangedListener? = null
-    var onStateChangedListener: OnStateChangedListener? = null
-
-    private var timer: CountDownTimer? = null
-
-    var currentTimeInMillis: Long = TimeUnit.MINUTES.toMillis(timeInMinutes)
-        private set
-
-    private val overallTimeInMillis = TimeUnit.MINUTES.toMillis(timeInMinutes)
-
-    val progress: Float
-        get() {
-            return (currentTimeInMillis.toDouble() / overallTimeInMillis).toFloat()
-        }
-
-    var state: State = State.IDLE
+    var state: State = State.AWAITING_START
     private set(newValue) {
         field = newValue
         onStateChangedListener?.invoke(field)
     }
 
+    val phase: PomodoroPhase
+    get() {
+        val lastKnownState = lastKnownStateMachineState
+        if (lastKnownState == null) {
+            throw IllegalStateException("last known state machine state was null")
+        }
+        return lastKnownState.asPomodoroPhase()
+    }
+
+    val timeForCurrentPhase: Long
+        get() {
+            val lastKnownState = lastKnownStateMachineState
+            if (lastKnownState == null) {
+                throw IllegalStateException("last known state machine state was null")
+            }
+            return TimeUnit.MINUTES.toMillis(lastKnownState.extractTime())
+        }
+
+    private var restartableTimer: RestartableTimer? = null
+    private var lastKnownStateMachineState: PomodoroStateMachine.State? = null
+
+    var onStateChangedListener: ((state: State) -> Unit)? = null
+    var onPhaseChangedListener: ((phase: PomodoroPhase, timeInMillis: Long) -> Unit)? = null
+    var onTickListener: ((progress: Float, timeLeftInMillis: Long) -> Unit)? = null
+
+    init {
+        onNewStateMachineState(pomodoroStateMachine.next())
+    }
+
     fun start() {
-        if (timer != null) {
-            throw IllegalStateException("Timer has been already started.")
-        }
-
+        restartableTimer?.start()
         state = State.RUNNING
-
-        timer = object : CountDownTimer(currentTimeInMillis, TICK_INTERVAL) {
-
-            override fun onTick(millisUntilFinished: Long) {
-                currentTimeInMillis = millisUntilFinished
-                onTimeChangedListener?.invoke()
-            }
-
-            override fun onFinish() {
-                currentTimeInMillis = 0L
-                onTimeChangedListener?.invoke()
-                state = State.FINISHED
-            }
-        }
-
-        timer?.start()
     }
 
     fun stop() {
-        state = State.STOPPED
-        currentTimeInMillis = TimeUnit.MINUTES.toMillis(timeInMinutes)
-        timer?.cancel()
-        timer = null
+        cancelTimer()
+        onNewStateMachineState(pomodoroStateMachine.next())
+    }
+
+    private fun cancelTimer() {
+        restartableTimer?.stop()
+        restartableTimer = null
+    }
+
+    private fun onNewStateMachineState(stateMachineState: PomodoroStateMachine.State) {
+        lastKnownStateMachineState = stateMachineState
+
+        this.state = State.AWAITING_START
+        val timeInMinutes = stateMachineState.extractTime()
+
+        cancelTimer()
+        restartableTimer = RestartableTimer(timeInMinutes)
+
+        restartableTimer?.onTimeChangedListener = {
+            val timer = restartableTimer
+            if (timer != null) {
+                onTickListener?.invoke(timer.progress, timer.currentTimeInMillis)
+            }
+        }
+
+        restartableTimer?.onStateChangedListener = { timerState ->
+            if (timerState == RestartableTimer.State.FINISHED) {
+                stop()
+            }
+        }
+
+        onPhaseChangedListener?.invoke(stateMachineState.asPomodoroPhase(), TimeUnit.MINUTES.toMillis(timeInMinutes))
+    }
+
+    private fun PomodoroStateMachine.State.asPomodoroPhase(): PomodoroPhase {
+        return when (this) {
+            is PomodoroStateMachine.State.Idling ->
+                throw IllegalStateException("Idling is not a valid timer state")
+            is PomodoroStateMachine.State.Active ->
+                PomodoroPhase.ACTIVE
+            is PomodoroStateMachine.State.Rest,
+            is PomodoroStateMachine.State.Break ->
+                PomodoroPhase.BREAK
+        }
+    }
+
+    private fun PomodoroStateMachine.State.extractTime(): Long {
+        return when (this) {
+            is PomodoroStateMachine.State.Idling ->
+                throw IllegalStateException("Idling does not have any associated timer")
+            is PomodoroStateMachine.State.Active ->
+                this.timeInMinutes
+            is PomodoroStateMachine.State.Rest ->
+                this.timeInMinutes
+            is PomodoroStateMachine.State.Break ->
+                this.timeInMinutes
+        }
     }
 
 }

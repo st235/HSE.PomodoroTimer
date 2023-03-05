@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:padding="32dp"
         app:cpb_progress="1.0"
-        app:cpb_progressBackgroundColor="@color/gray_300"
+        app:cpb_progressBackgroundColor="@color/gray_100"
         app:cpb_progressBarColor="@color/red_500"
         app:cpb_progressBarThickness="8dp"
         app:cpb_progressIndicatorSize="12dp" />

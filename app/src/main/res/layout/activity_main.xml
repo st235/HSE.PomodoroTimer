@@ -18,19 +18,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/status_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="26sp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:background="@drawable/rounded_rect_gray100"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progress_bar_container"
+        tools:text="Focus" />
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/playback_control_button"
         android:layout_width="96dp"
         android:layout_height="96dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="22dp"
         android:background="@drawable/shape_circle"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackgroundBorderless"
         android:padding="18dp"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/progress_bar_container"
+        app:layout_constraintTop_toBottomOf="@id/status_text_view"
         app:srcCompat="@drawable/ic_round_play"
         app:tint="@color/red_500" />
 
